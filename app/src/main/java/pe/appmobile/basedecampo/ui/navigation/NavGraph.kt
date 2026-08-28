@@ -11,10 +11,12 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.NavType
 import pe.appmobile.basedecampo.data.repository.ExpedicionRepository
+import pe.appmobile.basedecampo.ui.screens.CuadernoScreen
 import pe.appmobile.basedecampo.ui.screens.ExpedicionScreen
 import pe.appmobile.basedecampo.ui.screens.HomeScreen
 import pe.appmobile.basedecampo.ui.screens.OnboardingScreen
 import pe.appmobile.basedecampo.ui.screens.ParentalGateScreen
+import pe.appmobile.basedecampo.ui.viewmodel.CuadernoViewModel
 import pe.appmobile.basedecampo.ui.viewmodel.ExpedicionViewModel
 import pe.appmobile.basedecampo.ui.viewmodel.HomeViewModel
 
@@ -23,6 +25,7 @@ object Rutas {
     const val HOME = "home"
     const val EXPEDICION = "expedicion/{expedicionId}"
     const val PARENTAL_GATE = "parental_gate"
+    const val CUADERNO = "cuaderno"
     fun expedicion(id: String) = "expedicion/$id"
 }
 
@@ -42,7 +45,7 @@ fun NavGraph(repository: ExpedicionRepository, esPrimerLanzamiento: Boolean) {
             HomeScreen(
                 uiState = uiState,
                 onExpedicionClick = { navController.navigate(Rutas.expedicion(it)) },
-                onCuadernoClick = { /* Cuaderno de Planes: pantalla propia pendiente, fuera del alcance de este plan */ },
+                onCuadernoClick = { navController.navigate(Rutas.CUADERNO) },
                 onPerfilClick = { navController.navigate(Rutas.PARENTAL_GATE) },
             )
         }
@@ -65,6 +68,11 @@ fun NavGraph(repository: ExpedicionRepository, esPrimerLanzamiento: Boolean) {
         }
         composable(Rutas.PARENTAL_GATE) {
             ParentalGateScreen(repository = repository)
+        }
+        composable(Rutas.CUADERNO) {
+            val viewModel: CuadernoViewModel = viewModel(factory = CuadernoViewModel.Factory(repository))
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            CuadernoScreen(uiState = uiState, onVolver = { navController.popBackStack() })
         }
     }
 }

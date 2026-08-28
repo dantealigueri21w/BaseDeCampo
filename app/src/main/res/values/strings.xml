@@ -31,6 +31,14 @@
     <string name="expedicion_resultado_valido">¡Tuco ya puede partir! El plan tiene sentido.</string>
     <string name="expedicion_resultado_invalido">Todavía falta algo. %1$s</string>
 
+    <!-- Cuaderno de Planes -->
+    <string name="cuaderno_titulo">Cuaderno de Planes</string>
+    <string name="cuaderno_seccion_expediciones">Tus expediciones</string>
+    <string name="cuaderno_seccion_insignias">Tus insignias</string>
+    <string name="cuaderno_cd_volver">Volver</string>
+    <string name="cuaderno_insignia_obtenida">%1$s, obtenida</string>
+    <string name="cuaderno_insignia_pendiente">%1$s, todavía no obtenida</string>
+
     <!-- Parental gate -->
     <string name="gate_instruccion">Mantén presionado 3 segundos</string>
     <string name="gate_titulo">Zona para quien acompaña</string>
