@@ -4,6 +4,7 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -156,9 +156,9 @@ private fun SelectorInstrumento(
                 IlustracionInstrumento(instrumentoId = id, modifier = Modifier.fillMaxSize())
             }
         }
-        Row(
+        FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.horizontalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             instrumentos.filter { it.id != instrumentoElegidoId }.forEach { instrumento ->
                 FichaArrastrable(
@@ -189,9 +189,9 @@ private fun SecuenciaDePasos(
     val density = LocalDensity.current
     val anchoFichaPx = with(density) { anchoFicha.toPx() }
 
-    Row(
+    FlowRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.horizontalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         ordenActual.forEachIndexed { indice, pasoId ->
             val paso = pasos.first { it.id == pasoId }
