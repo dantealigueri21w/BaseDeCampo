@@ -40,6 +40,8 @@ import pe.appmobile.basedecampo.R
 import pe.appmobile.basedecampo.data.entity.InstrumentoEntity
 import pe.appmobile.basedecampo.domain.model.PasoProcedimiento
 import pe.appmobile.basedecampo.ui.art.IlustracionInstrumento
+import pe.appmobile.basedecampo.ui.art.IlustracionTuco
+import pe.appmobile.basedecampo.ui.art.PoseTuco
 import pe.appmobile.basedecampo.ui.components.FichaArrastrable
 import pe.appmobile.basedecampo.ui.components.ZonaSoltar
 import pe.appmobile.basedecampo.ui.viewmodel.ExpedicionUiState
@@ -92,6 +94,10 @@ fun ExpedicionScreen(
 
         uiState.resultado?.let { resultado ->
             Spacer(Modifier.height(16.dp))
+            IlustracionTuco(
+                pose = if (resultado.esValido) PoseTuco.CELEBRANDO else PoseTuco.CONFUNDIDO,
+                modifier = Modifier.size(120.dp),
+            )
             Text(
                 text = if (resultado.esValido) {
                     stringResource(R.string.expedicion_resultado_valido)

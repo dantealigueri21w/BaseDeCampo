@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -17,14 +18,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import pe.appmobile.basedecampo.R
+import pe.appmobile.basedecampo.ui.art.IlustracionTuco
+import pe.appmobile.basedecampo.ui.art.PoseTuco
 
-private data class PantallaOnboarding(val tituloRes: Int, val textoRes: Int)
+private data class PantallaOnboarding(val tituloRes: Int, val textoRes: Int, val pose: PoseTuco)
 
 private val PANTALLAS = listOf(
-    PantallaOnboarding(R.string.onboarding_1_titulo, R.string.onboarding_1_texto),
-    PantallaOnboarding(R.string.onboarding_2_titulo, R.string.onboarding_2_texto),
-    PantallaOnboarding(R.string.onboarding_3_titulo, R.string.onboarding_3_texto),
-    PantallaOnboarding(R.string.onboarding_4_titulo, R.string.onboarding_4_texto),
+    PantallaOnboarding(R.string.onboarding_1_titulo, R.string.onboarding_1_texto, PoseTuco.SALUDO),
+    PantallaOnboarding(R.string.onboarding_2_titulo, R.string.onboarding_2_texto, PoseTuco.EXPLORANDO),
+    PantallaOnboarding(R.string.onboarding_3_titulo, R.string.onboarding_3_texto, PoseTuco.CELEBRANDO),
+    PantallaOnboarding(R.string.onboarding_4_titulo, R.string.onboarding_4_texto, PoseTuco.DE_PIE),
 )
 
 @Composable
@@ -38,6 +41,7 @@ fun OnboardingScreen(onTerminar: () -> Unit) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        IlustracionTuco(pose = pantalla.pose, modifier = Modifier.size(180.dp))
         Text(stringResource(pantalla.tituloRes), style = MaterialTheme.typography.headlineLarge)
         Text(stringResource(pantalla.textoRes), style = MaterialTheme.typography.bodyLarge)
         Button(onClick = { if (esUltima) onTerminar() else indice++ }) {
