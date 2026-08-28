@@ -89,8 +89,9 @@
   - `Insignias.kt`: las 11 insignias de la sección 3 (círculo + anillo + símbolo propio,
     atenuadas cuando no están obtenidas) — wireadas en la nueva `CuadernoScreen`.
   - `IlustracionTuco.kt`: Tuco vía archivo real (no Canvas, por decisión explícita de la sección 1
-    de la especificación) — las 8 poses de `Downloads/personajes/Gemini_Generated_Image_74ajc9…`
-    se recortaron con Python/Pillow (fondo removido por distancia de color, recorte al contenido,
+    de la especificación) — las 8 poses de la hoja de personaje ya validada en
+    `Downloads/personajes/` (ver sección 0.1 del handoff) se recortaron con Python/Pillow (fondo
+    removido por distancia de color, recorte al contenido,
     ≤1024px, WebP calidad 85) a `res/drawable-nodpi/tuco_<pose>.webp`. Wireado en `OnboardingScreen`
     (una pose por pantalla) y en el resultado de `ExpedicionScreen` (celebrando/confundido).
   - **Nota honesta sobre el grep de verificación de la sección 5 de la especificación de arte**:
