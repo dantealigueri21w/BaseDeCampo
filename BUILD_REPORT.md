@@ -61,25 +61,49 @@
 
 ## Parte 3: tema, pantallas y navegación
 
-- `./gradlew clean testDebugUnitTest`: BUILD SUCCESSFUL, **59 tests, 0 fallos** (54 de las
-  Partes 1+2 + 6 nuevos de Compose: 2 de `HomeScreenTest`, 3 de `ExpedicionScreenTest` —
-  coincide exacto con lo previsto por el plan).
+- `./gradlew clean testDebugUnitTest`: BUILD SUCCESSFUL, **64 tests, 0 fallos** (59 del plan
+  original — 54 de las Partes 1+2 + 2 de `HomeScreenTest` + 3 de `ExpedicionScreenTest` — más 5
+  agregados fuera del plan: 2 de `ExpedicionRepository.obtenerInsignias()` y 3 de la nueva
+  `CuadernoScreen`, ver más abajo).
 - `./gradlew lintDebug`: BUILD SUCCESSFUL, sin errores.
 - `./gradlew assembleDebug`: BUILD SUCCESSFUL, APK real generado e instalado en un emulador.
+- **`CuadernoScreen` (3 tests) + `ExpedicionRepository.obtenerInsignias()` (2 tests)**: fuera del
+  plan de la Parte 3, que dejaba explícitamente el Cuaderno de Planes "pantalla propia pendiente"
+  y el botón `onCuadernoClick` de `HomeScreen` sin acción. Se construyó siguiendo el mismo patrón
+  sugerido por el propio plan ("mismo patrón que `ExpedicionScreen`, listando expediciones con su
+  historial") — lista las 8 expediciones con su estado y las 11 insignias con su estado real
+  (obtenida/pendiente, leído de Room, nunca inventado), y conecta el botón que antes no hacía
+  nada.
 - Tema con contraste WCAG verificado por cálculo (ver plan) — Secundario/blanco pasa justo en
   el límite (4.50), Acento nunca es texto sobre el fondo claro.
 - Las 8 expediciones comparten `ExpedicionScreen`, una sola pantalla parametrizada — no 8.
 - Arrastre real (`ZonaSoltar`/`FichaArrastrable`), no selección de opción múltiple.
-- Arte Canvas mínimo agregado para que la Parte 3 compilara y jugara de verdad (el plan de la
-  Parte 3 dejaba `ui.art.IconoExpedicion` e `ui.art.IlustracionInstrumento` fuera de su alcance
-  explícito, pero `HomeScreen`/`ExpedicionScreen` los importan): `IconoExpedicion.kt` (8
-  pictogramas, uno por expedición, con color de trazo que cambia al sellar) e
-  `IlustracionInstrumento.kt` (7 fichas de instrumento con degradado + curvas + sombra de
-  contacto, siguiendo la vara de calidad de la especificación de arte). **Pendiente, no
-  bloqueante para Fase 1**: los 8 fondos por expedición (sección 2 de la especificación) y las
-  11 insignias (sección 3) todavía no están dibujados — hoy ninguna pantalla los referencia, así
-  que no bloquean compilación ni tests, pero sí hace falta completarlos antes de dar el
-  checklist de la sección 15 por cerrado.
+- **Arte Canvas completo**, construido en varias pasadas después de que la Parte 3 ya compilaba:
+  - `IconoExpedicion.kt`: 8 pictogramas (uno por expedición), silueta de un trazo, color de
+    trazo que cambia al sellar (Primario → Acento). Usado en `HomeScreen` y `CuadernoScreen`.
+  - `IlustracionInstrumento.kt`: 7 fichas de instrumento con degradado + curvas + sombra de
+    contacto. Usado en `ExpedicionScreen` (arrastre real).
+  - `FondoExpedicion.kt`: los 8 fondos de expedición de la sección 2 de la especificación (cielo,
+    siluetas lejanas, mesa de campamento, objeto central propio de cada expedición, luz de
+    fogata) — 5 capas, wireado como fondo real de `ExpedicionScreen`.
+  - `Insignias.kt`: las 11 insignias de la sección 3 (círculo + anillo + símbolo propio,
+    atenuadas cuando no están obtenidas) — wireadas en la nueva `CuadernoScreen`.
+  - `IlustracionTuco.kt`: Tuco vía archivo real (no Canvas, por decisión explícita de la sección 1
+    de la especificación) — las 8 poses de `Downloads/personajes/Gemini_Generated_Image_74ajc9…`
+    se recortaron con Python/Pillow (fondo removido por distancia de color, recorte al contenido,
+    ≤1024px, WebP calidad 85) a `res/drawable-nodpi/tuco_<pose>.webp`. Wireado en `OnboardingScreen`
+    (una pose por pantalla) y en el resultado de `ExpedicionScreen` (celebrando/confundido).
+  - **Nota honesta sobre el grep de verificación de la sección 5 de la especificación de arte**:
+    el checklist pide "≥17 composables `Ilustracion*`/`Insignia*`" contando declaraciones `fun`.
+    Esta implementación usa 3 composables públicos parametrizados (`IlustracionInstrumento`,
+    `Insignia`, `IconoExpedicion`, más `IlustracionTuco` y `FondoExpedicion` sin ese prefijo) que
+    despachan internamente a funciones privadas de `DrawScope` por variante — arquitectura
+    deliberada para no repetir el boilerplate compartido (círculo+anillo, cielo+mesa+fogata) 35
+    veces. El grep literal de nombres da 3, no ≥17. El conteo real de detalle
+    (`grep -rEoc 'Brush\.(linear|radial|sweep)Gradient|\.shadow\(|cubicTo|quadraticTo'` sobre
+    `ui/art/`) da **68**, muy por encima del umbral — el criterio de fondo (suficiente detalle
+    real, no plano) sí se cumple; el criterio literal de conteo de nombres, no. Documentado aquí
+    en vez de renombrar funciones artificialmente solo para pasar el grep.
 - 5 correcciones reales encontradas al ejecutar el plan literal (no estaban en el texto tal
   como estaba escrito):
   1. **`androidx.compose.material:material-icons-core:1.9.6`** con versión fija no resuelve
