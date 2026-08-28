@@ -33,6 +33,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import pe.appmobile.basedecampo.R
 import pe.appmobile.basedecampo.ui.art.IconoExpedicion
+import pe.appmobile.basedecampo.ui.theme.CremaMapa
 import pe.appmobile.basedecampo.ui.theme.MarronNoche
 import pe.appmobile.basedecampo.ui.theme.NaranjaFogata
 import pe.appmobile.basedecampo.ui.viewmodel.ExpedicionConEstado
@@ -52,7 +53,7 @@ fun HomeScreen(
             Text(
                 text = stringResource(R.string.home_titulo),
                 style = MaterialTheme.typography.headlineLarge,
-                color = MaterialTheme.colorScheme.onBackground,
+                color = CremaMapa,
             )
             Spacer(Modifier.height(24.dp))
 
@@ -83,12 +84,12 @@ fun HomeScreen(
                     onClick = onPerfilClick,
                     modifier = Modifier.size(56.dp)
                         .semantics { contentDescription = perfilCdTexto },
-                ) { Icon(Icons.Filled.Person, contentDescription = null) }
+                ) { Icon(Icons.Filled.Person, contentDescription = null, tint = CremaMapa) }
                 IconButton(
                     onClick = onCuadernoClick,
                     modifier = Modifier.size(56.dp)
                         .semantics { contentDescription = cuadernoCdTexto },
-                ) { Icon(Icons.Filled.Menu, contentDescription = null) }
+                ) { Icon(Icons.Filled.Menu, contentDescription = null, tint = CremaMapa) }
             }
         }
     }

@@ -15,9 +15,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -39,11 +41,13 @@ import androidx.compose.ui.unit.sp
 import pe.appmobile.basedecampo.R
 import pe.appmobile.basedecampo.data.entity.InstrumentoEntity
 import pe.appmobile.basedecampo.domain.model.PasoProcedimiento
+import pe.appmobile.basedecampo.ui.art.FondoExpedicion
 import pe.appmobile.basedecampo.ui.art.IlustracionInstrumento
 import pe.appmobile.basedecampo.ui.art.IlustracionTuco
 import pe.appmobile.basedecampo.ui.art.PoseTuco
 import pe.appmobile.basedecampo.ui.components.FichaArrastrable
 import pe.appmobile.basedecampo.ui.components.ZonaSoltar
+import pe.appmobile.basedecampo.ui.theme.CremaMapa
 import pe.appmobile.basedecampo.ui.viewmodel.ExpedicionUiState
 
 @Composable
@@ -55,17 +59,27 @@ fun ExpedicionScreen(
     onSellarPlan: () -> Unit,
 ) {
     val expedicion = uiState.expedicion ?: return
+    Box(modifier = Modifier.fillMaxSize()) {
+    FondoExpedicion(expedicionId = expedicion.id, modifier = Modifier.fillMaxSize())
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
     ) {
-        Text(expedicion.nombre, style = MaterialTheme.typography.headlineLarge)
-        Text(expedicion.pregunta, style = MaterialTheme.typography.bodyLarge)
+        Text(
+            expedicion.nombre,
+            style = MaterialTheme.typography.headlineLarge,
+            color = CremaMapa,
+        )
+        Text(
+            expedicion.pregunta,
+            style = MaterialTheme.typography.bodyLarge,
+            color = CremaMapa,
+        )
         Spacer(Modifier.height(16.dp))
 
-        Text(stringResource(R.string.expedicion_instrumentos_titulo), style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(R.string.expedicion_instrumentos_titulo), style = MaterialTheme.typography.titleLarge, color = CremaMapa)
         SelectorInstrumento(
             instrumentos = uiState.instrumentos,
             instrumentoElegidoId = uiState.instrumentoElegidoId,
@@ -73,7 +87,7 @@ fun ExpedicionScreen(
         )
         Spacer(Modifier.height(16.dp))
 
-        Text(stringResource(R.string.expedicion_secuencia_titulo), style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(R.string.expedicion_secuencia_titulo), style = MaterialTheme.typography.titleLarge, color = CremaMapa)
         SecuenciaDePasos(
             pasos = expedicion.pasos,
             ordenActual = uiState.ordenPasos,
@@ -81,7 +95,7 @@ fun ExpedicionScreen(
         )
         Spacer(Modifier.height(16.dp))
 
-        Text(stringResource(R.string.expedicion_repeticiones_titulo), style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(R.string.expedicion_repeticiones_titulo), style = MaterialTheme.typography.titleLarge, color = CremaMapa)
         ContadorRepeticiones(
             valor = uiState.repeticionesElegidas,
             onCambiar = onCambiarRepeticiones,
@@ -94,19 +108,32 @@ fun ExpedicionScreen(
 
         uiState.resultado?.let { resultado ->
             Spacer(Modifier.height(16.dp))
-            IlustracionTuco(
-                pose = if (resultado.esValido) PoseTuco.CELEBRANDO else PoseTuco.CONFUNDIDO,
-                modifier = Modifier.size(120.dp),
-            )
-            Text(
-                text = if (resultado.esValido) {
-                    stringResource(R.string.expedicion_resultado_valido)
-                } else {
-                    stringResource(R.string.expedicion_resultado_invalido, resultado.mensajeError.orEmpty())
-                },
-                color = if (resultado.esValido) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error,
-            )
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surface,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    IlustracionTuco(
+                        pose = if (resultado.esValido) PoseTuco.CELEBRANDO else PoseTuco.CONFUNDIDO,
+                        modifier = Modifier.size(120.dp),
+                    )
+                    Text(
+                        text = if (resultado.esValido) {
+                            stringResource(R.string.expedicion_resultado_valido)
+                        } else {
+                            stringResource(R.string.expedicion_resultado_invalido, resultado.mensajeError.orEmpty())
+                        },
+                        color = if (resultado.esValido) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            }
         }
+    }
     }
 }
 
