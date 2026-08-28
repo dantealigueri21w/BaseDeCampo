@@ -276,3 +276,47 @@ que el resultado es igual de correcto con el contenido envuelto en varias línea
 
 **Total final: 68 tests, 0 fallos · `lintDebug` limpio · `assembleDebug` en verde · APK firmado y
 verificado (`apksigner verify` exit 0) · ciclo real jugado y confirmado en `fabrica34` (API 34).**
+
+## Corrección del arrastre y cierre de Fase 2 (28/08/2026)
+
+Jugando el ciclo real ya con la app instalada (no solo en Robolectric) aparecieron dos problemas
+más, encontrados y corregidos después del cierre inicial de arriba:
+
+1. **`SecuenciaDePasos` escuchaba el arrastre en cualquier dirección** (`detectDragGestures`) pero
+   solo aplicaba el movimiento horizontal: arrastrar hacia abajo capturaba el gesto (bloqueando el
+   scroll de la pantalla) sin mover nada en el eje que sí importaba. Corregido a
+   `detectHorizontalDragGestures`, que deja pasar el scroll vertical y solo reacciona al arrastre
+   lateral real.
+2. La mesa donde se suelta el instrumento era un cuadro invisible mientras estaba vacío. Se agregó
+   borde, fondo y el texto "Suelta aquí"; además, la primera ficha de instrumento y de paso hacen
+   un rebote sutil hasta el primer arrastre, y soltar correctamente da una vibración corta.
+
+Con la corrección aplicada se repitió el ciclo completo (instrumento, pasos con orden inválido
+rechazado y orden válido aceptado, sellado, refresco del Home) en una instalación limpia del
+emulador, sin ningún dato previo.
+
+**Compilación final, fuente real del entregable (sección 15, v8):**
+
+```
+./gradlew clean testDebugUnitTest lintDebug assembleDebug
+```
+
+BUILD SUCCESSFUL · 68 tests, 0 fallos · `lintDebug` limpio. El APK de esta build local, renombrado
+a `BaseDeCampo.v1.0.0.apk`, es el que se entrega en `66.BaseDeCampo/4.BaseDeCampo.v1.0.0.apk` — no
+el de GitHub Actions, que queda solo como verificación adicional en un runner limpio (ambos
+resultaron con el mismo SHA-256, build reproducible).
+
+```
+SHA-256: 8286e7e8baf96bd75f363e42b1e23c61a14e5c935fc4965e9eaf67b9b9042d6f
+```
+
+`apksigner verify` y `aapt2 dump badging` sobre ese APK confirman: firmado con el keystore de
+depuración por defecto, `versionName` `1.0.0` coincide con el nombre del archivo, sin permiso
+`INTERNET`, ícono de lanzador real conectado (`res/mipmap-anydpi-v26/ic_launcher.xml`).
+
+Se agregaron `database/schema.sql`, `database/sample_data.sql` y `README.md`, que la sección 13.1
+pide dejar en el repositorio y que faltaban desde la Fase 1.
+
+Fase 2 completa: capturas reales tomadas jugando en `fabrica34` (API 34, instalación limpia),
+Memoria Descriptiva y Manual de Usuario generados y verificados, carpeta de entrega
+`66.BaseDeCampo/` armada con los cuatro archivos en el orden fijo de la sección 14.3.
