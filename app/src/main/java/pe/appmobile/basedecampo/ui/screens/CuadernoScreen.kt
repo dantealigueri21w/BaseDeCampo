@@ -13,7 +13,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -37,7 +37,7 @@ fun CuadernoScreen(uiState: CuadernoUiState, onVolver: () -> Unit) {
         IconButton(
             onClick = onVolver,
             modifier = Modifier.size(56.dp).semantics { contentDescription = volverCd },
-        ) { Icon(Icons.Filled.ArrowBack, contentDescription = null) }
+        ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null) }
 
         Text(stringResource(R.string.cuaderno_titulo), style = MaterialTheme.typography.headlineLarge)
 
