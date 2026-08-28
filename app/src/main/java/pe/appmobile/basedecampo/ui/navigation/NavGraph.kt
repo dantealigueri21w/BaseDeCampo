@@ -2,6 +2,7 @@ package pe.appmobile.basedecampo.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -42,6 +43,14 @@ fun NavGraph(repository: ExpedicionRepository, esPrimerLanzamiento: Boolean) {
         composable(Rutas.HOME) {
             val viewModel: HomeViewModel = viewModel(factory = HomeViewModel.Factory(repository))
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            // El Home vive en la base del back stack -- volver de una Expedición no crea un
+            // HomeViewModel nuevo, así que sin esto el poste recién sellado se quedaría con el
+            // color viejo hasta reabrir la app entera. Se refresca cada vez que la pantalla
+            // vuelve a RESUMED, no solo en su creación inicial.
+            LifecycleResumeEffect(Unit) {
+                viewModel.recargar()
+                onPauseOrDispose {}
+            }
             HomeScreen(
                 uiState = uiState,
                 onExpedicionClick = { navController.navigate(Rutas.expedicion(it)) },

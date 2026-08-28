@@ -41,12 +41,16 @@ fun FichaArrastrable(
     content: @Composable () -> Unit,
 ) {
     var offset by remember { mutableStateOf(Offset.Zero) }
-    var posicionPropia by remember { mutableStateOf(Rect.Zero) }
+    var posicionDeReposo by remember { mutableStateOf(Rect.Zero) }
 
     Box(
         modifier = modifier
+            // onGloballyPositioned va ANTES (fuera) de .offset{} a propósito: así reporta la
+            // posición de reposo de la ficha (su casilla real en el Row), estable durante todo
+            // el arrastre -- nunca la posición ya desplazada, que puede llegar con retraso
+            // respecto al valor de offset en un arrastre rápido y hacer fallar el soltado.
+            .onGloballyPositioned { posicionDeReposo = it.boundsInWindow() }
             .offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }
-            .onGloballyPositioned { posicionPropia = it.boundsInWindow() }
             .pointerInput(zonaDestino) {
                 detectDragGestures(
                     onDrag = { change, dragAmount ->
@@ -55,8 +59,8 @@ fun FichaArrastrable(
                     },
                     onDragEnd = {
                         val centroFinal = Offset(
-                            posicionPropia.center.x + offset.x,
-                            posicionPropia.center.y + offset.y,
+                            posicionDeReposo.center.x + offset.x,
+                            posicionDeReposo.center.y + offset.y,
                         )
                         if (zonaDestino.contains(centroFinal)) {
                             onSoltadaEnZona()

@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -154,7 +156,10 @@ private fun SelectorInstrumento(
                 IlustracionInstrumento(instrumentoId = id, modifier = Modifier.fillMaxSize())
             }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.horizontalScroll(rememberScrollState()),
+        ) {
             instrumentos.filter { it.id != instrumentoElegidoId }.forEach { instrumento ->
                 FichaArrastrable(
                     zonaDestino = posicionSlot,
@@ -180,18 +185,21 @@ private fun SecuenciaDePasos(
     ordenActual: List<String>,
     onMoverPaso: (String, Int) -> Unit,
 ) {
-    val anchoFicha = 96.dp
+    val anchoFicha = 140.dp
     val density = LocalDensity.current
     val anchoFichaPx = with(density) { anchoFicha.toPx() }
 
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.horizontalScroll(rememberScrollState()),
+    ) {
         ordenActual.forEachIndexed { indice, pasoId ->
             val paso = pasos.first { it.id == pasoId }
             var offsetX by remember(pasoId) { mutableStateOf(0f) }
             Box(
                 modifier = Modifier
-                    .widthIn(min = 96.dp)
-                    .height(120.dp)
+                    .width(anchoFicha)
+                    .height(140.dp)
                     .offset { IntOffset(offsetX.toInt(), 0) }
                     .semantics { contentDescription = "Paso ${indice + 1}: ${paso.descripcion}" }
                     .pointerInput(pasoId, ordenActual.size) {
@@ -210,7 +218,11 @@ private fun SecuenciaDePasos(
                         )
                     },
             ) {
-                Text("${indice + 1}. ${paso.descripcion}", modifier = Modifier.padding(8.dp))
+                Text(
+                    "${indice + 1}. ${paso.descripcion}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(8.dp),
+                )
             }
         }
     }

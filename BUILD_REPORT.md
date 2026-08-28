@@ -145,10 +145,56 @@ los dos AVD disponibles en esta máquina (`fabrica34`, `fabrica_test`), con resu
   "Can't find service: package"/"activity") — se confirmó que no es un problema de la app
   (ocurre incluso solo con `pm list packages`, sin tocar `pe.appmobile.basedecampo`).
 
-Ambos síntomas apuntan a inestabilidad del propio emulador en esta máquina/entorno (probablemente
-virtualización anidada), no a un bug de Base de Campo — la única corrida donde el sistema estuvo
-sano por completo confirmó APK instalable y `MainActivity` arrancable sin excepción.
-**Queda pendiente**: repetir este paso en un dispositivo físico o un entorno con emulador estable
-antes de dar la Fase 1 por cerrada — la sección 10.3 del maestro es explícita en que ningún test
-automatizado lo reemplaza, así que no se marca como hecho aunque los 59 tests y el `assembleDebug`
-sí estén en verde.
+Ambos síntomas apuntan a inestabilidad del propio emulador en esta máquina/entorno, no a un bug
+de Base de Campo.
+
+### Paso 4 — completado en una sesión posterior, siguiendo la receta de la sección 13.3 del maestro
+
+La causa real de la inestabilidad: el AVD `fabrica34` (API 34, el correcto, ver 13.3) tenía
+estado corrupto por los varios `adb emu kill` forzados de la sesión anterior, y además se estaba
+arrancando sin los flags que la sección 13.3 ya documenta como necesarios
+(`-no-window -no-audio -gpu swiftshader_indirect`) ni con el chequeo de estabilidad real
+(`topResumedActivity` x5 seguidos, no solo `boot_completed=1`). Con `-wipe-data` + la receta
+completa de 13.3, el emulador arrancó sano. **El ciclo real se jugó de punta a punta en el AVD
+`fabrica34`** (arrastrar el termómetro a la mesa, confirmar la secuencia de pasos ya correcta,
+subir las repeticiones a 3, sellar el plan de "El Frío de la Puna", ver el mensaje de éxito con
+Tuco celebrando, volver al Home y confirmar que el poste correspondiente cambia a color Acento).
+
+**Se encontraron y corrigieron 5 bugs reales que ningún test automatizado había atrapado** —
+exactamente el escenario que la sección 10.3 anticipa:
+
+1. **`runBlocking` en `MainActivity.onCreate()` bloqueaba el hilo principal** esperando a Room
+   (que además puede tener que crear el archivo de la base de datos la primera vez) antes de
+   dibujar el primer frame — causa clásica de ANR en frío, y se reprodujo como tal en el
+   emulador. Corregido: `esPrimerLanzamiento` se resuelve de forma asíncrona con
+   `LaunchedEffect` dentro de `setContent`, sin bloquear `onCreate`.
+2. **`SecuenciaDePasos` (Row de pasos a ordenar) no tenía `horizontalScroll` y sus fichas usaban
+   `widthIn(min = ...)` sin tope** — el primer paso (el de texto más largo) consumía todo el
+   ancho disponible del Row y los pasos 2, 3 y 4 ni siquiera llegaban a componerse (confirmado
+   con `uiautomator dump`: solo existía un nodo "Paso 1" en todo el árbol). Corregido: ancho fijo
+   por ficha (`140.dp`) + `Modifier.horizontalScroll(rememberScrollState())`.
+3. **El mismo bug, en el Row de instrumentos para arrastrar** (`SelectorInstrumento`): con 6
+   instrumentos por mostrar (7 menos el ya elegido), solo entraban 4 en pantalla y el resto no
+   se renderizaba. Misma corrección: `horizontalScroll` agregado al Row.
+4. **`FichaArrastrable.onDragEnd` duplicaba el offset del arrastre**: `onGloballyPositioned`
+   estaba *dentro* del modificador `.offset{}` en la cadena, así que `posicionPropia` ya incluía
+   el desplazamiento actual del dedo — y el código sumaba `offset` una segunda vez al calcular el
+   centro final, con lo que el soltado casi nunca caía dentro de la zona real (jugando a mano, el
+   arrastre del termómetro no llegaba nunca al slot). Corregido moviendo `onGloballyPositioned`
+   *fuera* de `.offset{}` (reporta la posición de reposo, estable) y sumando el offset una sola
+   vez — diseño más robusto además, porque no depende de que la medición esté perfectamente al
+   día en cada frame de un arrastre rápido.
+5. **`HomeViewModel` nunca se refrescaba al volver de una expedición**: el Home vive en la base
+   del back stack de Navigation Compose, así que volver con "atrás" desde `ExpedicionScreen`
+   reutiliza la misma instancia del ViewModel (no se recrea, no se vuelve a ejecutar su `init`) —
+   el poste recién sellado se quedaba con su color viejo hasta cerrar y reabrir la app entera.
+   Corregido con `LifecycleResumeEffect` en el composable de la ruta `HOME`, que llama a
+   `viewModel.recargar()` cada vez que la pantalla vuelve a estado RESUMED (ya existía el método
+   `recargar()` en el ViewModel, escrito en la Parte 3 original, pero nunca se invocaba desde
+   ningún lado).
+
+Ninguno de estos 5 bugs lo atraparon los 64 tests automatizados (los tests de pantalla prueban
+`HomeScreen`/`ExpedicionScreen` de forma aislada, con un `uiState` fijo pasado a mano, no a través
+de navegación real con un ViewModel vivo) — es exactamente el tipo de bug que la sección 10.3
+documenta como invisible a los tests. Con los 5 corregidos, el ciclo completo funciona de
+principio a fin en un dispositivo real, no solo en Robolectric.
