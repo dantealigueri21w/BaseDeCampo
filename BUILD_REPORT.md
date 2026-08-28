@@ -32,3 +32,29 @@
 - Icono de lanzador: versión inicial ya dibujada en Canvas/vector (brújula abierta, paleta de
   la ficha) — se revisa de nuevo en la Parte 3 junto con el resto del arte.
 - Sin UI todavía más allá del placeholder, sin Room todavía — eso es la Parte 2 y 3.
+
+## Parte 2: Room y datos semilla
+
+- `./gradlew clean testDebugUnitTest`: BUILD SUCCESSFUL, **54 tests, 0 fallos** (30 de la
+  Parte 1 + 6 de `MotorRepaso` + 10 de `AppDatabaseTest` + 8 de `ExpedicionRepositoryTest`).
+  Nota: el plan de la Parte 2 preveía "11 tests" para `AppDatabaseTest`, pero el bloque de
+  código que el propio plan especifica solo contiene 10 métodos `@Test` (verificado con
+  `grep -c '@Test'`); se implementó tal cual venía en el plan, sin inventar un test nº 11.
+  Por una coincidencia de dos desvíos que se compensan (Parte 1 real 30 en vez de 29, y esta
+  Parte 2 real 10 en vez de 11), el total final de 54 sí coincide con lo que el plan preveía.
+- `./gradlew lintDebug`: BUILD SUCCESSFUL, sin errores.
+- Persistencia real con Room 2.8.4, probada con Robolectric 4.16.1 sobre una base de datos en
+  memoria (`@Config(sdk = [34])` — SDK 37 del proyecto todavía no tiene soporte estable en
+  Robolectric; ver Task 1 del plan de la Parte 2 para el detalle completo de por qué se eligió
+  Robolectric sobre test instrumentado o `BundledSQLiteDriver`).
+- 8 tablas (las 7 de la ficha + `repaso_pendiente`, agregada para la repetición espaciada
+  obligatoria de la sección 5.3 del maestro).
+- Datos semilla reales: 8 expediciones, 36 pasos de procedimiento, 7 instrumentos, 11 insignias
+  (verificado por conteo directo, no de memoria).
+- `MotorRepaso` (6 tests): repetición espaciada, motor nuevo de esta Parte, no modifica nada de
+  la Parte 1.
+- `ExpedicionRepository` (8 tests): compone Room con `MotorPlanExperimento` y `MotorProgreso` ya
+  construidos en la Parte 1.
+- Grep de higiene (nombres de herramientas IA) y verificación de identidad de git: limpio en
+  ambos casos.
+- Sin UI todavía — eso es la Parte 3.
