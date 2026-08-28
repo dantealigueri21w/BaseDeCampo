@@ -198,3 +198,81 @@ Ninguno de estos 5 bugs lo atraparon los 64 tests automatizados (los tests de pa
 de navegación real con un ViewModel vivo) — es exactamente el tipo de bug que la sección 10.3
 documenta como invisible a los tests. Con los 5 corregidos, el ciclo completo funciona de
 principio a fin en un dispositivo real, no solo en Robolectric.
+
+### Corrección adicional tras releer la sección 15: no combinar arrastre con scroll
+
+El arreglo del bug 2 de arriba usó primero `Modifier.horizontalScroll` en las filas de pasos e
+instrumentos — funcionaba, pero la sección 15 prohíbe explícitamente esa combinación ("todo entra
+o es alcanzable... sin combinar arrastre con scroll"), porque un swipe horizontal sobre una ficha
+arrastrable es ambiguo entre "arrastrar" y "hacer scroll". Se reemplazó por `FlowRow` (envuelve a
+la siguiente línea dentro del scroll vertical que la pantalla ya tiene, sin scroll horizontal
+propio) — mismo patrón que ya usa `HomeScreen` para sus 8 iconos. La lógica de reordenar por
+arrastre no cambió: sigue siendo por índice de la lista, no por posición visual en pantalla, así
+que el resultado es igual de correcto con el contenido envuelto en varias líneas.
+
+## Lista de verificación final (sección 15) — repasada sobre el resultado final
+
+- [x] La mecánica principal se resuelve interactuando (arrastre real + reordenar + contador), no
+  eligiendo opciones — confirmado jugando el ciclo real en emulador.
+- [x] Ninguna pantalla principal es solo título + párrafo + botones (Home y Expedición tienen
+  fondo Canvas, iconos/fichas ilustrados, interacción real).
+- [x] Ninguna captura parece app bancaria o formulario administrativo.
+- [x] Hay algo que descubrir (8 fondos distintos), coleccionar (11 insignias, Cuaderno de Planes)
+  y una razón para volver (racha, repetición espaciada de `MotorRepaso`).
+- [x] Todas las funciones prometidas tienen lógica y persistencia reales — Room real, sin datos
+  inventados en memoria.
+- [x] El *parental gate* funciona (gesto de mantener presionado 3 segundos, sin pregunta
+  aritmética) y detrás solo hay ajustes + progreso real leído de Room.
+- **[~] "El primer reto se resuelve por descubrimiento, sin bloque de texto que explique la
+  mecánica" (sección 5.5)**: `ExpedicionScreen` sí tiene encabezados de texto explícitos
+  ("Arrastra el instrumento correcto a la mesa", "Ordena los pasos arrastrándolos") sobre cada
+  sub-mecánica. Se documenta como desvío consciente, no como algo resuelto: la ficha no da
+  ninguna alternativa visual para comunicar "esto se arrastra" sin texto (a diferencia de, por
+  ejemplo, un resaltado o animación de sugerencia), y con 8 expediciones distintas cada una con
+  3 sub-mecánicas, quitar el texto sin reemplazarlo por otra señal visual arriesgaba dejar al
+  niño sin ninguna pista. Queda como mejora pendiente, no como checklist marcado a la fuerza.
+- [x] Datos semilla cumplen las cantidades de la ficha (8 expediciones, 7 instrumentos, 36 pasos,
+  11 insignias — verificado por conteo directo en `SeedData.kt`, no de memoria).
+- **[~] Ilustraciones mínimas de la sección 4 (17+, comando de la 4.0)**: el grep literal de
+  composables `Ilustracion*`/`Insignia*` da 3, no 17+ (ver nota de la Parte 3 más arriba — 3
+  composables públicos parametrizados en vez de uno por variante, con 68 construcciones reales
+  de degradado/sombra/curva). Documentado como desvío consciente, no resuelto a la fuerza.
+- [x] El español es natural y los errores se explican ("Ese instrumento no mide lo que esta
+  expedición necesita", no un genérico "Error").
+- [x] Las versiones son las fijadas en la sección 7, con las correcciones reales documentadas
+  arriba (KSP, BOM de Compose sin versiones sueltas).
+- [x] `domain/` se prueba sin UI (30 tests, JVM puro) · Room real (`AppDatabase`, sin SQL en
+  Composables) · sin datos inventados en la UI.
+- [x] Hay más de 20 `@Test` y todos pasan — **68 tests, 0 fallos** (verificado desde `clean`).
+- [x] Cada pantalla alcanzable tiene su test de Compose que la renderiza de verdad — Home,
+  Expedición, Cuaderno, Onboarding y Parental Gate, las 5 pantallas navegables.
+- [x] Se jugó al menos un ciclo real y completo de la mecánica principal sobre el APK compilado
+  en un emulador real (ver Paso 4 más arriba) — no solo en Robolectric.
+- [x] Cualquier fila cuya cantidad de elementos depende de los datos se probó con el caso más
+  exigente (5 pasos, 7 instrumentos) y todo es alcanzable sin combinar arrastre con scroll
+  (`FlowRow`, ver corrección de arriba).
+- [x] Sin permiso `INTERNET` en el manifiesto — funciona en modo avión por diseño (toda la
+  persistencia es Room local).
+- [x] Objetivos táctiles ≥ 48dp (fichas de 100-140dp, botones de 56-120dp), `contentDescription`
+  presente en todo elemento interactivo, todos los textos en `strings.xml`.
+- [x] `versionName` (`1.0.0`) coincide con el nombre del APK (`BaseDeCampo.v1.0.0.apk`).
+- [x] El ícono de lanzador está conectado — `aapt2 dump badging` sobre el APK final muestra
+  `application-icon-*` reales (verificado tras la recompilación final, no antes).
+- [x] No aplica motor de señal continua (sin audio/sensores en esta app).
+- [x] El emulador se cerró limpio al terminar (`adb emu kill` + verificación de que no quedan
+  procesos `qemu-system*`).
+
+**Carpeta lista para entregar (fin de la Fase 1)**
+- [x] `grep` de herramientas de IA no devuelve nada (repetido tras el hallazgo y corrección de la
+  Parte 3 — ver nota de higiene más arriba).
+- [x] `git log` muestra solo `dantealigueri21w <320279109+dantealigueri21w@users.noreply.github.com>`.
+- [ ] **Pendiente**: dejar la carpeta sin `.gradle/`, `build/`, `local.properties` — no se hizo
+  todavía porque la Fase 2 (capturas reales, memoria descriptiva) todavía necesita compilar y
+  ejecutar la app desde esta misma carpeta; se hace recién al empaquetar la entrega final.
+- [x] La memoria descriptiva y el manual no están dentro de la carpeta del proyecto (Fase 2
+  todavía no se generó).
+- [x] `BUILD_REPORT.md` (este archivo) tiene salidas reales en cada paso, incluidos los 5 bugs
+  reales encontrados y corregidos jugando de verdad — nada inventado.
+
+**Total final: 68 tests, 0 fallos · `lintDebug` limpio · `assembleDebug` en verde · APK firmado y
+verificado (`apksigner verify` exit 0) · ciclo real jugado y confirmado en `fabrica34` (API 34).**
