@@ -1,6 +1,7 @@
 package pe.appmobile.basedecampo.data.repository
 
 import pe.appmobile.basedecampo.data.AppDatabase
+import pe.appmobile.basedecampo.data.entity.InsigniaEntity
 import pe.appmobile.basedecampo.data.entity.InstrumentoEntity
 import pe.appmobile.basedecampo.data.entity.PlanSelladoEntity
 import pe.appmobile.basedecampo.data.entity.RachaEntity
@@ -80,6 +81,8 @@ class ExpedicionRepository(private val db: AppDatabase) {
         db.planSelladoDao().obtenerTodos().map { it.expedicionId }.toSet()
 
     suspend fun obtenerCatalogoInstrumentos(): List<InstrumentoEntity> = db.instrumentoDao().obtenerTodos()
+
+    suspend fun obtenerInsignias(): List<InsigniaEntity> = db.insigniaDao().obtenerTodas()
 
     private suspend fun registrarFalloParaRepaso(expedicionId: String, ahora: Long) {
         val existente = db.repasoPendienteDao().obtenerPorId(expedicionId)

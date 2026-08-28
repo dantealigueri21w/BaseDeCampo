@@ -110,4 +110,22 @@ class ExpedicionRepositoryTest {
         repository.sembrarSiEsPrimerLanzamiento()
         assertEquals(7, repository.obtenerCatalogoInstrumentos().size)
     }
+
+    @Test
+    fun `las 11 insignias sembradas empiezan todas sin obtener`() = runTest {
+        repository.sembrarSiEsPrimerLanzamiento()
+        val insignias = repository.obtenerInsignias()
+        assertEquals(11, insignias.size)
+        assertTrue(insignias.all { it.fechaObtenida == null })
+    }
+
+    @Test
+    fun `sellar el primer plan valido marca la insignia Primer Plan como obtenida`() = runTest {
+        repository.sembrarSiEsPrimerLanzamiento()
+        val expedicion = repository.obtenerExpedicionesConPasos().first { it.id == "frio_puna" }
+        val plan = PlanPropuesto("frio_puna", "termometro", expedicion.pasos.map { it.id }, 3)
+        repository.sellarPlan(expedicion, plan)
+        val insignias = repository.obtenerInsignias()
+        assertTrue(insignias.first { it.id == "primer_plan" }.fechaObtenida != null)
+    }
 }
