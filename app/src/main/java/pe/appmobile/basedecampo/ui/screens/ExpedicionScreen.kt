@@ -1,6 +1,15 @@
 package pe.appmobile.basedecampo.ui.screens
 
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,12 +40,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,6 +63,8 @@ import pe.appmobile.basedecampo.ui.art.PoseTuco
 import pe.appmobile.basedecampo.ui.components.FichaArrastrable
 import pe.appmobile.basedecampo.ui.components.ZonaSoltar
 import pe.appmobile.basedecampo.ui.theme.CremaMapa
+import pe.appmobile.basedecampo.ui.theme.MarronNoche
+import pe.appmobile.basedecampo.ui.theme.NaranjaFogata
 import pe.appmobile.basedecampo.ui.viewmodel.ExpedicionUiState
 
 @Composable
@@ -149,22 +164,36 @@ private fun SelectorInstrumento(
 
     Column {
         ZonaSoltar(
-            modifier = Modifier.size(140.dp),
+            modifier = Modifier
+                .size(140.dp)
+                .background(CremaMapa.copy(alpha = 0.12f), RoundedCornerShape(16.dp))
+                .border(2.dp, CremaMapa.copy(alpha = 0.6f), RoundedCornerShape(16.dp)),
             onPosicionConocida = { posicionSlot = it },
         ) {
-            instrumentoElegidoId?.let { id ->
-                IlustracionInstrumento(instrumentoId = id, modifier = Modifier.fillMaxSize())
+            if (instrumentoElegidoId == null) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        stringResource(R.string.expedicion_mesa_vacia),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = CremaMapa.copy(alpha = 0.7f),
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            } else {
+                IlustracionInstrumento(instrumentoId = instrumentoElegidoId, modifier = Modifier.fillMaxSize())
             }
         }
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            instrumentos.filter { it.id != instrumentoElegidoId }.forEach { instrumento ->
+            instrumentos.filter { it.id != instrumentoElegidoId }.forEachIndexed { indice, instrumento ->
+                val pistaActiva = indice == 0 && instrumentoElegidoId == null
                 FichaArrastrable(
                     zonaDestino = posicionSlot,
                     onSoltadaEnZona = { onElegir(instrumento.id) },
                     modifier = Modifier.size(100.dp)
+                        .offset(y = if (pistaActiva) pistaNudgeDp() else 0.dp)
                         .semantics { contentDescription = "Arrastra ${instrumento.nombre} a la mesa" },
                 ) {
                     IlustracionInstrumento(instrumentoId = instrumento.id, modifier = Modifier.fillMaxSize())
@@ -172,6 +201,27 @@ private fun SelectorInstrumento(
             }
         }
     }
+}
+
+/**
+ * Pequeño rebote animado (±6dp, vaivén continuo) para invitar a arrastrar sin usar texto -- ver
+ * hallazgo del 28/08/2026: la mecánica solo se explicaba con encabezados de texto, sin ninguna
+ * señal visual. Quien llama decide el eje aplicando el resultado a `offset(x=...)` o
+ * `offset(y=...)`.
+ */
+@Composable
+private fun pistaNudgeDp(): Dp {
+    val transicion = rememberInfiniteTransition(label = "pistaArrastre")
+    val valor by transicion.animateFloat(
+        initialValue = -6f,
+        targetValue = 6f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(650, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "pistaArrastreValor",
+    )
+    return valor.dp
 }
 
 /**
@@ -188,6 +238,8 @@ private fun SecuenciaDePasos(
     val anchoFicha = 140.dp
     val density = LocalDensity.current
     val anchoFichaPx = with(density) { anchoFicha.toPx() }
+    val haptics = LocalHapticFeedback.current
+    var yaArrastroAlgunPaso by remember { mutableStateOf(false) }
 
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -196,19 +248,23 @@ private fun SecuenciaDePasos(
         ordenActual.forEachIndexed { indice, pasoId ->
             val paso = pasos.first { it.id == pasoId }
             var offsetX by remember(pasoId) { mutableStateOf(0f) }
+            val pistaActiva = indice == 0 && !yaArrastroAlgunPaso
             Box(
                 modifier = Modifier
                     .width(anchoFicha)
                     .height(140.dp)
+                    .offset(x = if (pistaActiva) pistaNudgeDp() else 0.dp)
                     .offset { IntOffset(offsetX.toInt(), 0) }
                     .semantics { contentDescription = "Paso ${indice + 1}: ${paso.descripcion}" }
                     .pointerInput(pasoId, ordenActual.size) {
-                        detectDragGestures(
-                            onDrag = { change, dragAmount ->
+                        detectHorizontalDragGestures(
+                            onHorizontalDrag = { change, dragAmount ->
                                 change.consume()
-                                offsetX += dragAmount.x
+                                yaArrastroAlgunPaso = true
+                                offsetX += dragAmount
                                 val salto = (offsetX / anchoFichaPx).toInt()
                                 if (salto != 0) {
+                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                                     onMoverPaso(pasoId, indice + salto)
                                     offsetX -= salto * anchoFichaPx
                                 }
@@ -218,13 +274,25 @@ private fun SecuenciaDePasos(
                         )
                     },
             ) {
-                Text(
-                    "${indice + 1}. ${paso.descripcion}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(8.dp),
-                )
+                Column(modifier = Modifier.padding(8.dp)) {
+                    MarcadorPaso(numero = indice + 1)
+                    Spacer(Modifier.height(4.dp))
+                    Text(paso.descripcion, style = MaterialTheme.typography.bodyMedium)
+                }
             }
         }
+    }
+}
+
+/** Marcador de paso al estilo "hito de sendero" -- número sobre un círculo de Acento, para que
+ * cada ficha de paso no se vea como texto plano y combine con las fichas ilustradas de arriba. */
+@Composable
+private fun MarcadorPaso(numero: Int, modifier: Modifier = Modifier) {
+    Box(modifier = modifier.size(28.dp), contentAlignment = Alignment.Center) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            drawCircle(color = NaranjaFogata)
+        }
+        Text("$numero", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = MarronNoche)
     }
 }
 

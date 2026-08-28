@@ -23,6 +23,7 @@
 
     <!-- Expedición -->
     <string name="expedicion_instrumentos_titulo">Arrastra el instrumento correcto a la mesa</string>
+    <string name="expedicion_mesa_vacia">Suelta aquí</string>
     <string name="expedicion_secuencia_titulo">Ordena los pasos arrastrándolos</string>
     <string name="expedicion_repeticiones_titulo">¿Cuántas veces repetir la medición?</string>
     <string name="expedicion_sellar_plan">Sellar plan</string>

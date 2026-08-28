@@ -11,9 +11,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.IntOffset
 import kotlin.math.roundToInt
 
@@ -42,6 +44,7 @@ fun FichaArrastrable(
 ) {
     var offset by remember { mutableStateOf(Offset.Zero) }
     var posicionDeReposo by remember { mutableStateOf(Rect.Zero) }
+    val haptics = LocalHapticFeedback.current
 
     Box(
         modifier = modifier
@@ -63,6 +66,7 @@ fun FichaArrastrable(
                             posicionDeReposo.center.y + offset.y,
                         )
                         if (zonaDestino.contains(centroFinal)) {
+                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                             onSoltadaEnZona()
                         }
                         offset = Offset.Zero
