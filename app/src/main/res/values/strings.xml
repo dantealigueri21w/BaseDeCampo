@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Base de Campo</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_1_titulo">Bienvenido a Base de Campo</string>
+    <string name="onboarding_1_texto">Tuco necesita tu ayuda para planear cada expedición antes de salir.</string>
+    <string name="onboarding_2_titulo">Arma el plan</string>
+    <string name="onboarding_2_texto">Elige el instrumento correcto, ordena los pasos y decide cuántas veces repetir la medición.</string>
+    <string name="onboarding_3_titulo">Sella tu plan</string>
+    <string name="onboarding_3_texto">Cuando el plan tenga sentido, Tuco podrá partir de verdad.</string>
+    <string name="onboarding_4_titulo">Sin internet, sin cuentas</string>
+    <string name="onboarding_4_texto">Todo lo que hagas se guarda en este dispositivo. Nunca se pide tu nombre real.</string>
+    <string name="onboarding_continuar">Continuar</string>
+    <string name="onboarding_empezar">Empezar</string>
+
+    <!-- Home -->
+    <string name="home_titulo">La Mesa de Campamento</string>
+    <string name="home_cd_perfil">Ver perfil</string>
+    <string name="home_cd_cuaderno">Abrir el Cuaderno de Planes</string>
+    <string name="home_estado_sellado">Plan sellado</string>
+    <string name="home_estado_sin_plan">Sin plan todavía</string>
+
+    <!-- Expedición -->
+    <string name="expedicion_instrumentos_titulo">Arrastra el instrumento correcto a la mesa</string>
+    <string name="expedicion_secuencia_titulo">Ordena los pasos arrastrándolos</string>
+    <string name="expedicion_repeticiones_titulo">¿Cuántas veces repetir la medición?</string>
+    <string name="expedicion_sellar_plan">Sellar plan</string>
+    <string name="expedicion_cd_quitar_repeticion">Quitar una repetición</string>
+    <string name="expedicion_cd_agregar_repeticion">Agregar una repetición</string>
+    <string name="expedicion_resultado_valido">¡Tuco ya puede partir! El plan tiene sentido.</string>
+    <string name="expedicion_resultado_invalido">Todavía falta algo. %1$s</string>
+
+    <!-- Parental gate -->
+    <string name="gate_instruccion">Mantén presionado 3 segundos</string>
+    <string name="gate_titulo">Zona para quien acompaña</string>
+    <string name="gate_progreso_titulo">Progreso del niño</string>
+    <string name="gate_ajustes_sonido">Sonido</string>
+    <string name="gate_ajustes_vibracion">Vibración</string>
+    <string name="gate_version">Versión %1$s</string>
+
+    <!-- Ajustes (accesibles también para el niño) -->
+    <string name="ajustes_titulo">Ajustes</string>
+    <string name="ajustes_sonido">Sonido</string>
+    <string name="ajustes_vibracion">Vibración</string>
+</resources>
